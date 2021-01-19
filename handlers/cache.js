@@ -36,8 +36,8 @@ function handleCreateType(obj_type, object_data) {
         case cacheTypeIDs.CSOEconItem:
             this.Logger.debug("Got an item traded");
             var item = Dota2.schema.CSOEconItem.decode(object_data);
-            this.emit("gotItem", item);
             this.Inventory.push(item);
+            this.emit("gotItem", item);
             break;
     }
 }
@@ -57,8 +57,8 @@ function handleDestroyType(obj_type, object_data) {
         case cacheTypeIDs.CSOEconItem:
             this.Logger.debug("Traded item away");
             var item = Dota2.schema.CSOEconItem.decode(object_data);
-            this.emit("gaveItem", item);
             this.Inventory = this.Inventory.filter(i => item.id.notEquals(i.id));
+            this.emit("gaveItem", item);
             break;
     }
 }
@@ -77,8 +77,8 @@ function handleSubscribedType(obj_type, object_data, isDelete) {
                 // Put them back if it's not a delete
                 inv = inv.concat(items);
             }
-            this.emit("inventoryUpdate", inv);
             this.Inventory = inv;
+            this.emit("inventoryUpdate", inv);
             break;
         // Lobby snapshot.
         case cacheTypeIDs.CSODOTALobby:
@@ -86,29 +86,29 @@ function handleSubscribedType(obj_type, object_data, isDelete) {
             // but an object when called from onUpdateMultiple
             var lobby = Dota2.schema.CSODOTALobby.decode([].concat(object_data)[0]);
             this.Logger.debug("Received lobby snapshot for lobby ID " + lobby.lobby_id);
-            this.emit("practiceLobbyUpdate", lobby);
             this.Lobby = lobby;
+            this.emit("practiceLobbyUpdate", lobby);
             break;
         // Lobby invite snapshot.
         case cacheTypeIDs.CSODOTALobbyInvite:
             var lobbyInvite = Dota2.schema.CSODOTALobbyInvite.decode(object_data[0]);
             this.Logger.debug("Received lobby invite snapshot for group ID " + lobbyInvite.group_id);
-            this.emit("lobbyInviteUpdate", lobbyInvite);
             this.LobbyInvite = lobbyInvite;
+            this.emit("lobbyInviteUpdate", lobbyInvite);
             break;
         // Party snapshot.
         case cacheTypeIDs.CSODOTAParty:
             var party = Dota2.schema.CSODOTAParty.decode([].concat(object_data)[0]);
             this.Logger.debug("Received party snapshot for party ID " + party.party_id);
-            this.emit("partyUpdate", party);
             this.Party = party;
+            this.emit("partyUpdate", party);
             break;
         // Party invite snapshot.
         case cacheTypeIDs.CSODOTAPartyInvite:
             var party = Dota2.schema.CSODOTAPartyInvite.decode(object_data[0]);
             this.Logger.debug("Received party invite snapshot for group ID " + party.group_id);
-            this.emit("partyInviteUpdate", party);
             this.PartyInvite = party;
+            this.emit("partyInviteUpdate", party);
             break;
         default:
             this.Logger.warn("Unhandled cache ID: " + obj_type);
