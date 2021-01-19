@@ -1,5 +1,5 @@
 {
-  "name": "dota2",
+  "name": "dota2-fork",
   "version": "7.0.4",
   "dependencies": {
     "deferred": "^0.7.10",
@@ -22,11 +22,11 @@
     "test": "mocha --exit"
   },
   "readmeFilename": "README.md",
-  "description": "A node-steam plugin for Dota 2.",
+  "description": "A node-steam plugin for Dota 2. Fork with fresh updates",
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/Arcana/node-dota2.git"
+    "url": "https://github.com/Komar12124/node-dota2"
   },
   "keywords": [
     "steam",
