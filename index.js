@@ -19,7 +19,7 @@
 const util = require("util");
 const Long = require("long");
 const steam = require("steam");
-const steam_resources = require("steam-resources");
+const steam_resources = require("steam-resources-fork");
 const { createLogger, format, transports } = require('winston');
 const { EventEmitter } = require('events');
 

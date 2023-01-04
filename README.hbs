@@ -14,7 +14,7 @@ A fair warning, while the way you search for new functionality is still the same
 It is now easier to implement new functionality than it was back when this blog was written.
 
 Be careful, you'll need SVN if you want to work on the project! Executing an `npm install` inside the project directory
-has node-steam fetch the most recent node-steam-resources, which needs SVN to obtain the protobufs.
+has node-steam fetch the most recent node-steam-resources-fork, which needs SVN to obtain the protobufs.
 
 ## Installation and setup
 * `npm install dota2` in your repository root
