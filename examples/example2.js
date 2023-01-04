@@ -1,4 +1,4 @@
-var steam = require("steam"),
+var steam = require("steam-fork"),
     util = require("util"),
     fs = require("fs"),
     crypto = require("crypto"),

@@ -1,6 +1,6 @@
 {
   "name": "dota2-fork",
-  "version": "7.0.9",
+  "version": "7.0.10",
   "author": "Vlad Poshvaniuk <vladlovedance@gmail.com>",
   "homepage": "https://github.com/Komar12124/node-dota2",
   "dependencies": {
@@ -8,7 +8,7 @@
     "long": "^4.0.0",
     "merge": "^1.2.1",
     "mkdirp": "^1.0.4",
-    "steam": "^1.4.1",
+    "steam-fork": "^1.0.0",
     "steam-resources-fork": "^1.0.0",
     "winston": "^3.2.1"
   },
