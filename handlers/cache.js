@@ -117,16 +117,22 @@ function handleSubscribedType(obj_type, object_data, isDelete) {
 };
 
 Dota2.Dota2Client.prototype._handleWelcomeCaches = function handleWelcomeCaches(message) {
-    var welcome = Dota2.schema.CMsgClientWelcome.decode(message);
-    var _self = this;
+    try {
+        var welcome = Dota2.schema.CMsgClientWelcome.decode(message);
+        var _self = this;
 
-    if (welcome.outofdate_subscribed_caches)
-        this.Logger.debug("Handling out of date caches");
+        if (welcome.outofdate_subscribed_caches) {
+            this.Logger.debug("Handling out of date caches");
+        }
+
         welcome.outofdate_subscribed_caches.forEach(function(cache) {
             cache.objects.forEach(function(obj) {
                 handleSubscribedType.call(_self, obj.type_id, obj.object_data[0]);
             });
         });
+    } catch (e) {
+        this.Logger.warn("Can not handle welcome cahce");
+    }
 };
 
 // Events
@@ -213,14 +219,18 @@ Dota2.Dota2Client.prototype._handleWelcomeCaches = function handleWelcomeCaches(
 var handlers = Dota2.Dota2Client.prototype._handlers;
 
 var onCacheSubscribed = function onCacheSubscribed(message) {
-    var subscribe = Dota2.schema.CMsgSOCacheSubscribed.decode(message);
-    var _self = this;
+    try {
+        var subscribe = Dota2.schema.CMsgSOCacheSubscribed.decode(message);
+        var _self = this;
 
-    this.Logger.debug("Cache(s) subscribed, type(s): " + subscribe.objects.map(obj=>obj.type_id).toString());
+        this.Logger.debug("Cache(s) subscribed, type(s): " + subscribe.objects.map(obj=>obj.type_id).toString());
 
-    subscribe.objects.forEach(function(obj) {
-        handleSubscribedType.call(_self, obj.type_id, obj.object_data);
-    });
+        subscribe.objects.forEach(function(obj) {
+            handleSubscribedType.call(_self, obj.type_id, obj.object_data);
+        });
+    } catch (e) {
+        this.Logger.warn("Problems with cache subscribing");
+    }
 };
 handlers[Dota2.schema.ESOMsg.k_ESOMsg_CacheSubscribed] = onCacheSubscribed;
 
