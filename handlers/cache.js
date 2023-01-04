@@ -235,23 +235,27 @@ var onCacheSubscribed = function onCacheSubscribed(message) {
 handlers[Dota2.schema.ESOMsg.k_ESOMsg_CacheSubscribed] = onCacheSubscribed;
 
 var onUpdateMultiple = function onUpdateMultiple(message) {
-    var multi = Dota2.schema.CMsgSOMultipleObjects.decode(message);
-    var _self = this;
+    try {
+        var multi = Dota2.schema.CMsgSOMultipleObjects.decode(message);
+        var _self = this;
 
-    let multi_types = ["objects_modified", "objects_added", "objects_removed"];
-    multi_types.map((type, i) => {
-        if (multi[type]) {
-            let updates = {};
-            multi[type].forEach(obj => {
-                if (updates[obj.type_id]) updates[obj.type_id] = updates[obj.type_id].concat(obj.object_data);
-                else updates[obj.type_id] = [obj.object_data];
-            });
-            for (let type in updates)
-                handleSubscribedType.call(_self, parseInt(type), updates[type], i==2);
-        }
-    });
-
+        let multi_types = ["objects_modified", "objects_added", "objects_removed"];
+        multi_types.map((type, i) => {
+            if (multi[type]) {
+                let updates = {};
+                multi[type].forEach(obj => {
+                    if (updates[obj.type_id]) updates[obj.type_id] = updates[obj.type_id].concat(obj.object_data);
+                    else updates[obj.type_id] = [obj.object_data];
+                });
+                for (let type in updates)
+                    handleSubscribedType.call(_self, parseInt(type), updates[type], i==2);
+            }
+        });
+    } catch (e) {
+        this.Logger.warn('Problems with update multiple')
+    }
 };
+
 handlers[Dota2.schema.ESOMsg.k_ESOMsg_UpdateMultiple] = onUpdateMultiple;
 
 var onCreate = function onCreate(message) {
