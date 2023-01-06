@@ -1,6 +1,6 @@
 {
   "name": "dota2-fork",
-  "version": "7.0.14",
+  "version": "7.0.15",
   "author": "Vlad Poshvaniuk <vladlovedance@gmail.com>",
   "homepage": "https://github.com/Komar12124/node-dota2",
   "dependencies": {

@@ -84,10 +84,14 @@ function handleSubscribedType(obj_type, object_data, isDelete) {
         case cacheTypeIDs.CSODOTALobby:
             // object_data is an array when called from onCacheSubscribed
             // but an object when called from onUpdateMultiple
-            var lobby = Dota2.schema.CSODOTALobby.decode([].concat(object_data)[0]);
-            this.Logger.debug("Received lobby snapshot for lobby ID " + lobby.lobby_id);
-            this.Lobby = lobby;
-            this.emit("practiceLobbyUpdate", lobby);
+            try {
+                var lobby = Dota2.schema.CSODOTALobby.decode([].concat(object_data)[0]);
+                this.Logger.debug("Received lobby snapshot for lobby ID " + lobby.lobby_id);
+                this.Lobby = lobby;
+                this.emit("practiceLobbyUpdate", lobby);
+            } catch (e) {
+                this.Logger.debug("Can not decode some lobby data, it could be a problem");
+            }
             break;
         // Lobby invite snapshot.
         case cacheTypeIDs.CSODOTALobbyInvite:
@@ -126,12 +130,16 @@ Dota2.Dota2Client.prototype._handleWelcomeCaches = function handleWelcomeCaches(
         }
 
         welcome.outofdate_subscribed_caches.forEach(function(cache) {
-            cache.objects.forEach(function(obj) {
-                handleSubscribedType.call(_self, obj.type_id, obj.object_data[0]);
-            });
+            if (cache !== 'Undecoded') {
+                cache.objects.forEach(function(obj) {
+                    handleSubscribedType.call(_self, obj.type_id, obj.object_data[0]);
+                });
+            } else {
+                _self.Logger.debug("Can not decode outofdate_subscribed_caches, it could be a problem.");
+            }
         });
     } catch (e) {
-        this.Logger.warn("Can not handle welcome cahce");
+        this.Logger.warn("Can not handle welcome cache: ", e);
     }
 };
 
