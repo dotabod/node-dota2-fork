@@ -18,7 +18,6 @@
 
 const util = require("util");
 const Long = require("long");
-const steam = require("steam-fork");
 const steam_resources = require("steam-resources-fork");
 const { createLogger, format, transports } = require('winston');
 const { EventEmitter } = require('events');
@@ -40,7 +39,7 @@ Dota2.schema = steam_resources.GC.Dota.Internal;
  * The Dota 2 client that communicates with the GC
  * @class 
  * @alias module:Dota2.Dota2Client
- * @param {Object} steamClient - Node-steam client instance
+ * @param {Object} steamUser - node-steam-user client instance
  * @param {boolean} debug - Print debug information to console
  * @param {boolean} debugMore - Print even more debug information to console
  * @extends {EventEmitter} EventEmitter
@@ -89,7 +88,7 @@ Dota2.schema = steam_resources.GC.Dota.Internal;
  * @fires module:Dota2.Dota2Client#event:tipResponse
  * @fires module:Dota2.Dota2Client#event:tipped
  */
-Dota2.Dota2Client = function Dota2Client(steamClient, debug, debugMore) {
+Dota2.Dota2Client = function Dota2Client(steamUser, debug, debugMore) {
     EventEmitter.call(this);
     this.debug = debug || false;
     this.debugMore = debugMore || false;
@@ -139,74 +138,73 @@ Dota2.Dota2Client = function Dota2Client(steamClient, debug, debugMore) {
      */
     this.PartyInvite = null;
 
-    var steamUser = new steam.SteamUser(steamClient);
     this._user = steamUser;
-    this._client = steamClient;
-    this._gc = new steam.SteamGameCoordinator(steamClient, DOTA_APP_ID);
     this._appid = DOTA_APP_ID;
     
     this._gcReady = false;
     this._gcClientHelloIntervalId = null;
     this._gcConnectionStatus = Dota2.schema.GCConnectionStatus.GCConnectionStatus_NO_SESSION;
+    
     // node-steam wants this as a simple object, so we can't use CMsgProtoBufHeader
     this._protoBufHeader = {
         "msg": "",
         "proto": {
-            "client_steam_id": this._client.steamID,
+            "client_steam_id": this._user.steamID,
             "source_app_id": this._appid
         }
     };
 
-    var self = this;
-    this._gc.on("message", function fromGC(header, body, callback) {
+    this._user.on('receivedFromGC', (appId, msgType, payload) => {
         /* Routes messages from Game Coordinator to their handlers. */
-        callback = callback || null;
+        const body = steam_resources.Internal.CMsgGCClient.decode(payload)
 
-        var kMsg = header.msg;
-        self.Logger.silly("Dota2 fromGC: " + Dota2._getMessageName(kMsg));
+        this.Logger.debug("Dota2 fromGC: " + Dota2._getMessageName(msgType));
 
-        if (kMsg in self._handlers) {
-            if (callback) {
-                self._handlers[kMsg].call(self, body, callback);
-            } else {
-                self._handlers[kMsg].call(self, body);
-            }
+        if (msgType in this._handlers) {
+            // if (callback) {
+            //     self._handlers[kMsg].call(self, body, callback);
+            // } else {
+            this._handlers[msgType].call(this, payload);
+            //}
         } else {
             self.emit("unhandled", kMsg, Dota2._getMessageName(kMsg));
         }
     });
 
-    this._sendClientHello = function() {
-        if (self._gcReady) {
-            if (self._gcClientHelloIntervalId) {
-                clearInterval(self._gcClientHelloIntervalId);
-                self._gcClientHelloIntervalId = null;
+    this._sendClientHello = () => {
+        if (this._gcReady) {
+            if (this._gcClientHelloIntervalId) {
+                clearInterval(this._gcClientHelloIntervalId);
+                this._gcClientHelloIntervalId = null;
             }
             return;
         }
-        if (self._gcClientHelloCount > 10) {
-            self.Logger.warn("ClientHello has taken longer than 30 seconds! Reporting timeout...")
-            self._gcClientHelloCount = 0;
-            self.emit("hellotimeout");
+        if (this._gcClientHelloCount > 10) {
+            this.Logger.warn("ClientHello has taken longer than 30 seconds! Reporting timeout...")
+            this._gcClientHelloCount = 0;
+            this.emit("hellotimeout");
         }
         
-        self.Logger.debug("Sending ClientHello");
+        this.Logger.debug("Sending ClientHello");
         
-        if (!self._gc) {
-            self.Logger.error("Where the fuck is _gc?");
+        if (!this._user) {
+            this.Logger.error("Where the fuck is _gc?");
         } else {
-            self._gc.send(
-                {msg: Dota2.schema.EGCBaseClientMsg.k_EMsgGCClientHello, proto: {}},
+            this._user.sendToGC(
+                this._appid,
+                Dota2.schema.EGCBaseClientMsg.k_EMsgGCClientHello,
+                {},
                 new Dota2.schema.CMsgClientHello({}).toBuffer()
             );
         }
 
-        self._gcClientHelloCount++;
+        this._gcClientHelloCount++;
     };
 };
 util.inherits(Dota2.Dota2Client, EventEmitter);
 
 // Methods
+
 /**
  * Converts a 64bit Steam ID to a Dota2 account ID by deleting the 32 most significant bits
  * @alias module:Dota2.Dota2Client.ToAccountID
@@ -233,15 +231,13 @@ Dota2.Dota2Client.prototype.launch = function() {
     /* Reports to Steam that we are running Dota 2. Initiates communication with GC with EMsgGCClientHello */
     this.Logger.debug("Launching Dota 2");
     
-    this.AccountID = this.ToAccountID(this._client.steamID);
+    this.AccountID = this.ToAccountID(this._user.steamID);
     this.Party = null;
     this.Lobby = null;
     this.PartyInvite = null;
     this.Inventory = [];
     this.chatChannels = [];
-    this._user.gamesPlayed([{
-        "game_id": this._appid
-    }]);
+    this._user.gamesPlayed([this._appid]);
 
     // Keep knocking on the GCs door until it accepts us.
     // This is very bad practice and quite trackable.
@@ -268,20 +264,26 @@ Dota2.Dota2Client.prototype.exit = function() {
     }
     this._gcReady = false;
 
-    if (this._client.loggedOn) this._user.gamesPlayed([]);
+    if (this._user.steamID) {
+        this._user.gamesPlayed([]);
+    }
 };
 
 Dota2.Dota2Client.prototype.sendToGC = function(type, payload, handler, callback) {
-    var self = this;
     if (!this._gcReady) {
         this.Logger.warn("GC not ready, please listen for the 'ready' event.");
-        if (callback) callback(-1, null);                   // notify user that something went wrong
+        if (callback) callback(-1, null);
         return null;
     }
-    this._protoBufHeader.msg = type;
-    this._gc.send(this._protoBufHeader,                                // protobuf header, same for all messages
-                  payload.toBuffer(),                                  // payload of the message
-                  Dota2._convertCallback.call(self, handler, callback) // let handler treat callback so events are triggered
+
+    this._user.sendToGC(
+        this._appid,
+        type,
+        {},
+        payload.toBuffer(),
+        (appId, type, message) => {
+            Dota2._convertCallback(this, message, handler, callback)
+        }
     );
 }
 

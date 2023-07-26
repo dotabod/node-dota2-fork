@@ -98,12 +98,9 @@ Dota2._parseOptions = function(options, possibleOptions) {
     return details;
 };
 
-Dota2._convertCallback = function(handler, callback) {
-    var self = this;
+Dota2._convertCallback = function(instance, message, handler, callback) {
     if (callback && handler) {
-        return function (header, body) {
-            handler.call(self, body, callback);
-        }
+        handler.call(instance, message, callback);
     } else {
         return undefined;
     }

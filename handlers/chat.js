@@ -298,7 +298,7 @@ var onUserLeftChannel = function onOtherLeftChannel(message) {
     var userWhoLeft = Dota2.schema.CMsgDOTAOtherLeftChatChannel.decode(message);
     var channel = this._getChannelById(userWhoLeft.channel_id);
     // Check if it is me that left the channel
-    if (userWhoLeft.steam_id.equals(this._client.steamID)) {
+    if (userWhoLeft.steam_id.equals(this._user.steamID.getSteamID64())) {
         // Delete channel from cache
         this.chatChannels = this.chatChannels.filter(item => item.channel_id.notEquals(userWhoLeft.channel_id));
         if (channel) {
