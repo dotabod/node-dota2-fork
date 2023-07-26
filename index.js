@@ -145,7 +145,6 @@ Dota2.Dota2Client = function Dota2Client(steamUser, debug, debugMore) {
     this._gcClientHelloIntervalId = null;
     this._gcConnectionStatus = Dota2.schema.GCConnectionStatus.GCConnectionStatus_NO_SESSION;
     
-    // node-steam wants this as a simple object, so we can't use CMsgProtoBufHeader
     this._protoBufHeader = {
         "msg": "",
         "proto": {
@@ -155,17 +154,10 @@ Dota2.Dota2Client = function Dota2Client(steamUser, debug, debugMore) {
     };
 
     this._user.on('receivedFromGC', (appId, msgType, payload) => {
-        /* Routes messages from Game Coordinator to their handlers. */
-        const body = steam_resources.Internal.CMsgGCClient.decode(payload)
-
         this.Logger.debug("Dota2 fromGC: " + Dota2._getMessageName(msgType));
 
         if (msgType in this._handlers) {
-            // if (callback) {
-            //     self._handlers[kMsg].call(self, body, callback);
-            // } else {
             this._handlers[msgType].call(this, payload);
-            //}
         } else {
             self.emit("unhandled", kMsg, Dota2._getMessageName(kMsg));
         }
