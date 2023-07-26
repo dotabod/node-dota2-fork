@@ -159,7 +159,7 @@ Dota2.Dota2Client = function Dota2Client(steamUser, debug, debugMore) {
         if (msgType in this._handlers) {
             this._handlers[msgType].call(this, payload);
         } else {
-            self.emit("unhandled", kMsg, Dota2._getMessageName(kMsg));
+            this.emit('unhandled', kMsg, Dota2._getMessageName(kMsg));
         }
     });
 
