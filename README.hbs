@@ -6,7 +6,7 @@ node-dota2
 [![Dependency Status](https://img.shields.io/david/Arcana/node-dota2.svg)](https://david-dm.org/Arcana/node-dota2 "Check this project's dependencies")
 [![Greenkeeper badge](https://badges.greenkeeper.io/Arcana/node-dota2.svg)](https://greenkeeper.io/)
 
-A node-steam plugin for Dota 2, consider it in alpha state.
+A node-user-steama plugin for Dota 2, consider it in alpha state.
 
 ## Contributing
 Check out @RJacksonm1's blog post (his only blog post), [Extending node-dota2](https://blog.rjackson.me/extending-node-dota2/), for a rough overview of adding new functionality to the library.
@@ -14,7 +14,7 @@ A fair warning, while the way you search for new functionality is still the same
 It is now easier to implement new functionality than it was back when this blog was written.
 
 Be careful, you'll need SVN if you want to work on the project! Executing an `npm install` inside the project directory
-has node-steam fetch the most recent node-steam-resources-fork, which needs SVN to obtain the protobufs.
+has node-steam-user fetch the most recent node-steam-resources-fork, which needs SVN to obtain the protobufs.
 
 ## Installation and setup
 * `npm install dota2` in your repository root
@@ -39,10 +39,10 @@ Parameters:
 * `debugMore` - A boolean noting whether to print extended debug information. Activating this will log messages for each proto message exchanged with the GC.
 
 ```js
-var Steam = require('steam'),
-    steamClient = new Steam.SteamClient(),
-    dota2 = require('dota2'),
-    Dota2 = new dota2.Dota2Client(steamClient, true, false);
+var Steam = require('steam-user')
+var dota2 = require('dota2')
+
+var Dota2 = new dota2.Dota2Client(Steam, true, false);
 ```
 
 ## Disclaimer
