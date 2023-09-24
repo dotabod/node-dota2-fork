@@ -8,7 +8,7 @@
     "long": "^4.0.0",
     "merge": "^1.2.1",
     "mkdirp": "^1.0.4",
-    "steam-fork": "^1.0.3",
+    "steam-fork": "https://github.com/dotabod/node-steam-fork",
     "steam-resources-fork": "^1.0.4",
     "winston": "^3.2.1"
   },
